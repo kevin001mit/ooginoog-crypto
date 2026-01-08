@@ -8,7 +8,7 @@ genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
 # 2. The Prompt
 # We ask Gemini to act as a financial analyst.
-model = genai.GenerativeModel('gemini-1.5-flash')
+model = genai.GenerativeModel('gemini-2.5-flash')
 prompt = """
 You are a crypto expert. Write a very short, 3-sentence "Daily Market Vibe" analysis for Bitcoin and Ethereum. 
 Is the market Feeling Bullish (Greed) or Bearish (Fear) today? 
