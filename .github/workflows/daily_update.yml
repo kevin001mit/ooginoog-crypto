@@ -1,0 +1,37 @@
+name: Update AI Sentiment
+
+on:
+  schedule:
+    - cron: '0 */1 * * *' # Runs every 1 hours
+  workflow_dispatch:      # Allows you to click "Run Now" manually
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write     # Important: Allows the robot to save the new file
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11' # We use a modern version to avoid your old errors
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run AI Script
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python update_sentiment.py
+
+      - name: Commit and Push changes
+        run: |
+          git config --global user.name 'Ooginoog Bot'
+          git config --global user.email 'bot@ooginoog.com'
+          git add sentiment.json
+          git commit -m "Auto-update AI sentiment" || exit 0
+          git push
