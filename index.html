@@ -3,186 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ooginoog Professional</title>
+    <title>Ooginoog Terminal | Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://s3.tradingview.com/tv.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --bg: #0f1115; --card: #181b21; --accent: #3b82f6; --text: #cfd8dc; }
-        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; }
-        .card { background: var(--card); border: 1px solid #2a2f3a; border-radius: 8px; }
-        .btn-tab { padding: 8px 16px; font-size: 13px; font-weight: 600; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
-        .btn-tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
-        .verdict-box { background: rgba(59, 130, 246, 0.1); border-left: 4px solid var(--accent); }
-        .news-item:hover { background: #232730; }
-        /* Blink Animation for Live dot */
-        @keyframes pulse-red { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
-        .live-dot { width: 8px; height: 8px; background: #ef4444; border-radius: 50%; display: inline-block; animation: pulse-red 2s infinite; }
+        /* Bloomberg-style Dark Mode */
+        :root { --bg: #121418; --panel: #1b1e26; --border: #2f3342; --accent: #3b82f6; --text: #e2e8f0; }
+        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow: hidden; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        
+        /* Utilities */
+        .glass-panel { background: var(--panel); border: 1px solid var(--border); }
+        .data-value { font-family: 'Roboto Mono', monospace; }
+        .blink-red { animation: blink 2s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
-<body class="h-screen flex flex-col overflow-hidden">
+<body class="flex flex-col h-screen">
 
-    <header class="h-14 border-b border-gray-800 flex items-center justify-between px-6 bg-[#13151a]">
-        <div class="flex items-center gap-2">
-            <h1 class="text-xl font-bold tracking-tight text-white">OOGINOOG<span class="text-blue-500">PRO</span></h1>
-            <span class="text-[10px] bg-blue-900 text-blue-200 px-2 py-0.5 rounded uppercase font-bold">Terminal</span>
+    <div class="h-10 border-b border-gray-800 bg-black flex items-center overflow-hidden whitespace-nowrap relative">
+        <div class="absolute left-0 bg-blue-700 px-3 py-2 text-xs font-bold z-10">MARKET FLOW</div>
+        <div class="tradingview-widget-container w-full">
+            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+            {
+            "symbols": [{"proName":"BITSTAMP:BTCUSD","title":"BTC"},{"proName":"BITSTAMP:ETHUSD","title":"ETH"},{"proName":"BINANCE:SOLUSDT","title":"SOL"},{"proName":"INDEX:DXY","title":"DXY (USD Index)"}],
+            "showSymbolLogo": false, "colorTheme": "dark", "isTransparent": true, "displayMode": "regular", "locale": "en"
+            }
+            </script>
         </div>
-        <div class="flex gap-6 text-xs font-mono text-gray-400">
-            <span>BTC: <span id="head-btc" class="text-white">...</span></span>
-            <span>ETH: <span id="head-eth" class="text-white">...</span></span>
-            <span>GAS: <span class="text-yellow-500">12 Gwei</span></span>
-            <div class="flex items-center gap-2 text-green-400"><div class="live-dot"></div> CONNECTED</div>
-        </div>
-    </header>
+    </div>
 
-    <div class="flex flex-1 overflow-hidden">
+    <div class="flex-1 flex overflow-hidden">
         
-        <aside class="w-80 border-r border-gray-800 flex flex-col overflow-y-auto custom-scrollbar">
-            
-            <div class="p-5 border-b border-gray-800">
-                <div class="flex justify-between items-center mb-3">
-                    <h2 class="text-xs font-bold text-gray-500 uppercase">AI Sentiment Analysis</h2>
-                    <span id="ai-time" class="text-[10px] text-gray-600">UPDATING</span>
+        <aside class="w-72 flex flex-col border-r border-gray-800 bg-[#16181d]">
+            <div class="p-4 border-b border-gray-800">
+                <h1 class="text-lg font-bold tracking-tight text-white">OOGINOOG<span class="text-blue-500">.AI</span></h1>
+                <div class="text-[10px] text-gray-500 flex items-center gap-1 mt-1">
+                    <span class="w-2 h-2 rounded-full bg-green-500 blink-red"></span> SYSTEM LIVE
                 </div>
-                <div class="verdict-box p-4 rounded mb-3">
-                    <div class="text-xs text-blue-400 font-bold mb-1">VERDICT</div>
-                    <div id="ai-verdict" class="text-2xl font-black text-white tracking-widest">LOADING</div>
-                </div>
-                <p id="ai-reason" class="text-xs leading-relaxed text-gray-400">
-                    Connecting to Gemini Neural Net...
-                </p>
             </div>
 
-            <div class="p-5 border-b border-gray-800">
-                <h2 class="text-xs font-bold text-gray-500 uppercase mb-4">Market Emotion</h2>
-                <img src="https://alternative.me/crypto/fear-and-greed-index.png" alt="Fear/Greed" class="w-full rounded opacity-90 hover:opacity-100 transition">
-            </div>
-
-            <div class="p-5">
-                <h2 class="text-xs font-bold text-gray-500 uppercase mb-3">Professional Tools</h2>
-                <a href="YOUR_LEDGER_LINK" target="_blank" class="block bg-gradient-to-r from-gray-800 to-gray-900 p-3 rounded border border-gray-700 hover:border-blue-500 transition group">
-                    <div class="flex items-center gap-3">
-                        <div class="bg-blue-600 w-8 h-8 rounded flex items-center justify-center text-white font-bold text-xs">L</div>
-                        <div>
-                            <div class="text-sm font-bold text-gray-200 group-hover:text-blue-400">Ledger Nano X</div>
-                            <div class="text-[10px] text-gray-500">Hardware Security</div>
-                        </div>
+            <div class="p-4 space-y-4 overflow-y-auto">
+                <div>
+                    <h2 class="text-xs font-bold text-gray-500 uppercase mb-2">Market Phase</h2>
+                    <div id="ai-phase" class="text-sm font-bold text-white bg-blue-900/30 border border-blue-500/30 p-2 rounded text-center">
+                        ANALYZING...
                     </div>
-                </a>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="bg-gray-800 p-2 rounded border border-gray-700">
+                        <div class="text-[10px] text-gray-400">RESISTANCE</div>
+                        <div id="ai-res" class="text-sm font-mono text-red-400 font-bold">---</div>
+                    </div>
+                    <div class="bg-gray-800 p-2 rounded border border-gray-700">
+                        <div class="text-[10px] text-gray-400">SUPPORT</div>
+                        <div id="ai-sup" class="text-sm font-mono text-green-400 font-bold">---</div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between text-xs mb-1">
+                        <span class="text-gray-500">RISK SCORE</span>
+                        <span id="ai-risk" class="font-bold text-orange-500">0/10</span>
+                    </div>
+                    <div class="h-1.5 w-full bg-gray-800 rounded-full overflow-hidden">
+                        <div id="risk-bar" class="h-full bg-gradient-to-r from-green-500 via-yellow-500 to-red-500 w-0 transition-all duration-1000"></div>
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-6 border-t border-gray-700">
+                    <h2 class="text-xs font-bold text-gray-500 uppercase mb-3">Position Sizer</h2>
+                    <div class="space-y-2">
+                        <input type="number" id="calc-account" placeholder="Account Size ($)" class="w-full bg-black border border-gray-700 rounded p-2 text-xs text-white focus:border-blue-500 outline-none">
+                        <input type="number" id="calc-risk" placeholder="Risk % (e.g. 1)" class="w-full bg-black border border-gray-700 rounded p-2 text-xs text-white focus:border-blue-500 outline-none">
+                        <input type="number" id="calc-stop" placeholder="Stop Loss % (e.g. 5)" class="w-full bg-black border border-gray-700 rounded p-2 text-xs text-white focus:border-blue-500 outline-none">
+                        <button onclick="calculateSize()" class="w-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold py-2 rounded transition">CALCULATE</button>
+                    </div>
+                    <div id="calc-result" class="mt-3 text-xs text-center hidden">
+                        <div class="text-gray-400">Max Position Size:</div>
+                        <div class="text-lg font-mono font-bold text-white">$0.00</div>
+                    </div>
+                </div>
             </div>
         </aside>
 
-        <main class="flex-1 flex flex-col bg-[#0b0e11]">
-            <div class="h-12 border-b border-gray-800 flex items-center px-4 gap-2">
-                <button onclick="loadChart('BINANCE:BTCUSDT', this)" class="btn-tab active">BTC/USDT</button>
-                <button onclick="loadChart('BINANCE:ETHUSDT', this)" class="btn-tab">ETH/USDT</button>
-                <button onclick="loadChart('BINANCE:SOLUSDT', this)" class="btn-tab">SOL/USDT</button>
+        <main class="flex-1 flex flex-col bg-[#0b0e11] relative">
+            <div class="absolute top-4 right-4 z-20 flex bg-gray-800 rounded p-1 border border-gray-700">
+                <button onclick="switchView('chart')" class="px-3 py-1 text-xs font-bold text-white bg-gray-700 rounded shadow-sm" id="btn-chart">CHART</button>
+                <button onclick="switchView('heatmap')" class="px-3 py-1 text-xs font-bold text-gray-400 hover:text-white" id="btn-map">HEATMAP</button>
             </div>
-            
-            <div class="flex-1 relative" id="chart-container">
-                <div id="tv_chart_container" class="absolute inset-0"></div>
+
+            <div id="view-chart" class="w-full h-full">
+                <div class="tradingview-widget-container h-full">
+                    <div id="tv_chart" class="h-full"></div>
+                </div>
+            </div>
+
+            <div id="view-heatmap" class="w-full h-full hidden">
+                <div class="tradingview-widget-container h-full w-full">
+                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-crypto-coins-heatmap.js" async>
+                    {
+                    "dataSource": "Crypto",
+                    "blockSize": "market_cap_calc",
+                    "blockColor": "change",
+                    "locale": "en",
+                    "symbolUrl": "",
+                    "colorTheme": "dark",
+                    "hasTopBar": false,
+                    "isDataSetEnabled": false,
+                    "isWidget": true,
+                    "width": "100%",
+                    "height": "100%"
+                    }
+                    </script>
+                </div>
             </div>
         </main>
-
-        <aside class="w-72 border-l border-gray-800 bg-[#111318] flex flex-col">
-            <div class="p-4 border-b border-gray-800 bg-[#161920]">
-                <h2 class="text-xs font-bold text-gray-400 uppercase">Live News Wire</h2>
-            </div>
-            <div id="news-feed" class="flex-1 overflow-y-auto p-2 space-y-1">
-                <div class="text-xs text-center text-gray-600 mt-10">Waiting for Satellite Feed...</div>
-            </div>
-        </aside>
-
     </div>
 
     <script>
-        // 1. Initialize TradingView Chart
-        let widget;
-        function loadChart(symbol, btn) {
-            // Update Tab UI
-            document.querySelectorAll('.btn-tab').forEach(b => b.classList.remove('active'));
-            if(btn) btn.classList.add('active');
+        // --- 1. VIEW SWITCHER ---
+        function switchView(view) {
+            document.getElementById('view-chart').classList.add('hidden');
+            document.getElementById('view-heatmap').classList.add('hidden');
+            document.getElementById('btn-chart').className = "px-3 py-1 text-xs font-bold text-gray-400 hover:text-white";
+            document.getElementById('btn-map').className = "px-3 py-1 text-xs font-bold text-gray-400 hover:text-white";
 
-            // Load Chart
-            if (widget) {
-                widget.symbolInterval();
-                widget = new TradingView.widget({
-                    "autosize": true,
-                    "symbol": symbol,
-                    "interval": "D",
-                    "timezone": "Etc/UTC",
-                    "theme": "dark",
-                    "style": "1",
-                    "locale": "en",
-                    "toolbar_bg": "#f1f3f6",
-                    "enable_publishing": false,
-                    "hide_side_toolbar": false,
-                    "allow_symbol_change": false,
-                    "container_id": "tv_chart_container"
-                });
+            if(view === 'chart') {
+                document.getElementById('view-chart').classList.remove('hidden');
+                document.getElementById('btn-chart').className = "px-3 py-1 text-xs font-bold text-white bg-gray-700 rounded shadow-sm";
             } else {
-                widget = new TradingView.widget({
-                    "autosize": true,
-                    "symbol": symbol,
-                    "interval": "D",
-                    "timezone": "Etc/UTC",
-                    "theme": "dark",
-                    "style": "1",
-                    "locale": "en",
-                    "container_id": "tv_chart_container"
-                });
+                document.getElementById('view-heatmap').classList.remove('hidden');
+                document.getElementById('btn-map').className = "px-3 py-1 text-xs font-bold text-white bg-gray-700 rounded shadow-sm";
             }
         }
 
-        // 2. Load Your AI JSON Data
-        async function fetchIntelligence() {
+        // --- 2. CALCULATOR LOGIC ---
+        function calculateSize() {
+            const account = parseFloat(document.getElementById('calc-account').value);
+            const risk = parseFloat(document.getElementById('calc-risk').value);
+            const stop = parseFloat(document.getElementById('calc-stop').value);
+
+            if(account && risk && stop) {
+                // Formula: (Account * Risk%) / StopLoss%
+                const riskAmount = account * (risk / 100);
+                const positionSize = riskAmount / (stop / 100);
+                
+                const resBox = document.getElementById('calc-result');
+                resBox.classList.remove('hidden');
+                resBox.querySelector('.text-lg').innerText = "$" + positionSize.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            }
+        }
+
+        // --- 3. LOAD AI DATA ---
+        async function loadAI() {
             try {
                 const res = await fetch('sentiment.json?t=' + Date.now());
                 const data = await res.json();
-
-                // Update Verdict
-                const verdictEl = document.getElementById('ai-verdict');
-                verdictEl.innerText = data.verdict;
-                if(data.verdict === 'BUY') verdictEl.className = "text-2xl font-black text-green-500 tracking-widest";
-                if(data.verdict === 'SELL') verdictEl.className = "text-2xl font-black text-red-500 tracking-widest";
-
-                document.getElementById('ai-reason').innerText = data.reason;
-                document.getElementById('ai-time').innerText = data.date;
-
-                // Update News Feed
-                const newsBox = document.getElementById('news-feed');
-                newsBox.innerHTML = '';
-                data.headlines.forEach((title, index) => {
-                    const link = data.links ? data.links[index] : '#';
-                    const html = `
-                        <a href="${link}" target="_blank" class="block p-3 rounded hover:bg-[#1f232d] transition group border-b border-gray-800/50">
-                            <div class="text-[10px] text-blue-500 font-bold mb-1 group-hover:text-blue-400">COINDESK</div>
-                            <div class="text-xs text-gray-300 leading-snug group-hover:text-white">${title}</div>
-                        </a>
-                    `;
-                    newsBox.innerHTML += html;
-                });
-
-            } catch (e) { console.log('Waiting for data...'); }
+                
+                document.getElementById('ai-phase').innerText = data.phase || "NEUTRAL";
+                document.getElementById('ai-res').innerText = data.resistance || "---";
+                document.getElementById('ai-sup').innerText = data.support || "---";
+                document.getElementById('ai-risk').innerText = (data.risk_score || 0) + "/10";
+                
+                // Animate Risk Bar
+                const score = data.risk_score || 0;
+                document.getElementById('risk-bar').style.width = (score * 10) + "%";
+                
+            } catch(e) { console.log("AI Data Pending..."); }
         }
 
-        // 3. Load Header Prices
-        async function fetchPrices() {
-            try {
-                const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd');
-                const data = await res.json();
-                document.getElementById('head-btc').innerText = "$" + data.bitcoin.usd.toLocaleString();
-                document.getElementById('head-eth').innerText = "$" + data.ethereum.usd.toLocaleString();
-            } catch (e) {}
-        }
+        // --- 4. INIT CHART ---
+        new TradingView.widget({
+            "autosize": true,
+            "symbol": "BINANCE:BTCUSDT",
+            "interval": "D",
+            "timezone": "Etc/UTC",
+            "theme": "dark",
+            "style": "1",
+            "locale": "en",
+            "enable_publishing": false,
+            "hide_side_toolbar": false,
+            "container_id": "tv_chart"
+        });
 
-        // Init
-        loadChart('BINANCE:BTCUSDT', null);
-        fetchIntelligence();
-        fetchPrices();
-        
-        // Auto-refresh
-        setInterval(fetchIntelligence, 60000); 
+        loadAI();
     </script>
 </body>
 </html>
