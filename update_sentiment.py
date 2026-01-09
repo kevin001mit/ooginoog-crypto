@@ -21,24 +21,33 @@ for entry in feed.entries[:5]:
 
 news_text = "\n".join(headlines)
 
-# 3. The "Hedge Fund" Prompt
+# ... (keep your existing imports and setup) ...
+
+# 3. The "Institutional" Prompt
 prompt = f"""
-You are a senior crypto analyst. Here are the top 5 breaking news headlines right now:
+You are a senior technical analyst at a hedge fund.
+Analyze the following top 5 crypto news headlines:
 {news_text}
 
 Task:
-1. Summarize the "Market Mood" in 1 sentence.
-2. Give a specific 'Ooginoog Verdict': BUY, SELL, or WAIT.
-3. Provide a 1-sentence reason based on the news.
+1. Determine the "Market Phase" (e.g., Accumulation, Distribution, Markup, Markdown).
+2. Predict the immediate "Resistance Level" (Price ceiling) for Bitcoin.
+3. Predict the immediate "Support Level" (Price floor) for Bitcoin.
+4. Give a "Risk Score" (0-10, where 10 is extreme risk).
 
-Format your response as valid JSON like this:
+Format strictly as JSON:
 {{
-  "mood": "The market is cautious due to...",
-  "verdict": "WAIT",
-  "reason": "Regulatory uncertainty is high...",
-  "news_summary": "Top story: [Insert top story summary]"
+  "phase": "Accumulation",
+  "resistance": "$98,500",
+  "support": "$92,000",
+  "risk_score": 7,
+  "verdict": "WATCH",
+  "reason": "Regulatory news suggests volatility...",
+  "headlines": [ ... ] 
 }}
 """
+
+# ... (keep the rest of the generation/saving logic, just make sure to save the new fields) ...
 
 # 4. Generate & Save
 try:
