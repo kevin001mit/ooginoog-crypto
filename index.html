@@ -3,164 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ooginoog | Market Intelligence</title>
+    <title>Ooginoog Professional</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://s3.tradingview.com/tv.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Professional Dark Theme */
-        :root { --bg: #0b0e11; --panel: #151924; --border: #2a2e39; --accent: #2962ff; --text-main: #d1d4dc; --text-dim: #787b86; }
-        body { background-color: var(--bg); color: var(--text-main); font-family: -apple-system, BlinkMacSystemFont, "Trebuchet MS", Roboto, Ubuntu, sans-serif; overflow-x: hidden; }
-        
-        .panel { background-color: var(--panel); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
-        .grid-layout { display: grid; grid-template-columns: 300px 1fr; gap: 10px; padding: 10px; max-width: 1600px; margin: 0 auto; }
-        .sidebar { display: flex; flex-direction: column; gap: 10px; }
-        .main-content { display: flex; flex-direction: column; gap: 10px; }
-        
-        /* Typography & Status */
-        h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-dim); margin-bottom: 10px; font-weight: 600; }
-        .status-dot { height: 8px; width: 8px; background-color: #00b894; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px #00b894; }
-        .mono { font-family: 'Roboto Mono', monospace; }
-        
-        /* Mobile Responsive */
-        @media (max-width: 900px) { .grid-layout { grid-template-columns: 1fr; } }
+        :root { --bg: #0f1115; --card: #181b21; --accent: #3b82f6; --text: #cfd8dc; }
+        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; }
+        .card { background: var(--card); border: 1px solid #2a2f3a; border-radius: 8px; }
+        .btn-tab { padding: 8px 16px; font-size: 13px; font-weight: 600; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+        .btn-tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+        .verdict-box { background: rgba(59, 130, 246, 0.1); border-left: 4px solid var(--accent); }
+        .news-item:hover { background: #232730; }
+        /* Blink Animation for Live dot */
+        @keyframes pulse-red { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        .live-dot { width: 8px; height: 8px; background: #ef4444; border-radius: 50%; display: inline-block; animation: pulse-red 2s infinite; }
     </style>
 </head>
-<body>
+<body class="h-screen flex flex-col overflow-hidden">
 
-    <div class="tradingview-widget-container">
-        <div class="tradingview-widget-container__widget"></div>
-        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
-        {
-        "symbols": [
-            { "proName": "BITSTAMP:BTCUSD", "title": "Bitcoin" },
-            { "proName": "BITSTAMP:ETHUSD", "title": "Ethereum" },
-            { "proName": "BINANCE:SOLUSDT", "title": "Solana" },
-            { "proName": "NASDAQ:TSLA", "title": "Tesla" },
-            { "proName": "NASDAQ:NVDA", "title": "Nvidia" }
-        ],
-        "showSymbolLogo": true,
-        "colorTheme": "dark",
-        "isTransparent": false,
-        "displayMode": "adaptive",
-        "locale": "en"
-        }
-        </script>
-    </div>
+    <header class="h-14 border-b border-gray-800 flex items-center justify-between px-6 bg-[#13151a]">
+        <div class="flex items-center gap-2">
+            <h1 class="text-xl font-bold tracking-tight text-white">OOGINOOG<span class="text-blue-500">PRO</span></h1>
+            <span class="text-[10px] bg-blue-900 text-blue-200 px-2 py-0.5 rounded uppercase font-bold">Terminal</span>
+        </div>
+        <div class="flex gap-6 text-xs font-mono text-gray-400">
+            <span>BTC: <span id="head-btc" class="text-white">...</span></span>
+            <span>ETH: <span id="head-eth" class="text-white">...</span></span>
+            <span>GAS: <span class="text-yellow-500">12 Gwei</span></span>
+            <div class="flex items-center gap-2 text-green-400"><div class="live-dot"></div> CONNECTED</div>
+        </div>
+    </header>
 
-    <div class="grid-layout">
+    <div class="flex flex-1 overflow-hidden">
         
-        <aside class="sidebar">
-            <div class="panel p-6 flex items-center justify-between">
-                <h1 class="font-bold text-xl tracking-tighter text-blue-500">OOGINOOG<span class="text-white">PRO</span></h1>
-                <div class="status-dot"></div>
+        <aside class="w-80 border-r border-gray-800 flex flex-col overflow-y-auto custom-scrollbar">
+            
+            <div class="p-5 border-b border-gray-800">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-xs font-bold text-gray-500 uppercase">AI Sentiment Analysis</h2>
+                    <span id="ai-time" class="text-[10px] text-gray-600">UPDATING</span>
+                </div>
+                <div class="verdict-box p-4 rounded mb-3">
+                    <div class="text-xs text-blue-400 font-bold mb-1">VERDICT</div>
+                    <div id="ai-verdict" class="text-2xl font-black text-white tracking-widest">LOADING</div>
+                </div>
+                <p id="ai-reason" class="text-xs leading-relaxed text-gray-400">
+                    Connecting to Gemini Neural Net...
+                </p>
             </div>
 
-            <div class="panel p-5 flex-grow">
-                <h2>Gemini AI Market Sentiment</h2>
-                <div class="border-l-2 border-blue-500 pl-4 py-2 bg-gray-900/50 mb-4">
-                    <p id="ai-content" class="text-sm leading-relaxed text-gray-300 italic">"Initializing neural link..."</p>
-                </div>
-                <div class="flex justify-between text-xs text-gray-500 font-mono mt-4">
-                    <span>MODEL: GEMINI-1.5-FLASH</span>
-                    <span id="ai-date">UPDATING...</span>
-                </div>
+            <div class="p-5 border-b border-gray-800">
+                <h2 class="text-xs font-bold text-gray-500 uppercase mb-4">Market Emotion</h2>
+                <img src="https://alternative.me/crypto/fear-and-greed-index.png" alt="Fear/Greed" class="w-full rounded opacity-90 hover:opacity-100 transition">
             </div>
 
-            <div class="panel p-0 relative group cursor-pointer overflow-hidden">
-                <div class="absolute inset-0 bg-gradient-to-r from-blue-900 to-slate-900 opacity-80"></div>
-                <div class="relative p-5 text-center">
-                    <h3 class="font-bold text-white text-lg">Hardware Wallet</h3>
-                    <p class="text-xs text-gray-400 mb-3">Self-custody your assets.</p>
-                    <a href="YOUR_LEDGER_LINK_HERE" target="_blank" class="inline-block bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold py-2 px-6 rounded transition">BUY LEDGER</a>
-                </div>
+            <div class="p-5">
+                <h2 class="text-xs font-bold text-gray-500 uppercase mb-3">Professional Tools</h2>
+                <a href="YOUR_LEDGER_LINK" target="_blank" class="block bg-gradient-to-r from-gray-800 to-gray-900 p-3 rounded border border-gray-700 hover:border-blue-500 transition group">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-blue-600 w-8 h-8 rounded flex items-center justify-center text-white font-bold text-xs">L</div>
+                        <div>
+                            <div class="text-sm font-bold text-gray-200 group-hover:text-blue-400">Ledger Nano X</div>
+                            <div class="text-[10px] text-gray-500">Hardware Security</div>
+                        </div>
+                    </div>
+                </a>
             </div>
         </aside>
 
-        <main class="main-content">
+        <main class="flex-1 flex flex-col bg-[#0b0e11]">
+            <div class="h-12 border-b border-gray-800 flex items-center px-4 gap-2">
+                <button onclick="loadChart('BINANCE:BTCUSDT', this)" class="btn-tab active">BTC/USDT</button>
+                <button onclick="loadChart('BINANCE:ETHUSDT', this)" class="btn-tab">ETH/USDT</button>
+                <button onclick="loadChart('BINANCE:SOLUSDT', this)" class="btn-tab">SOL/USDT</button>
+            </div>
             
-            <div class="panel h-[500px] w-full relative">
-                <div class="tradingview-widget-container" style="height:100%;width:100%">
-                    <div id="tradingview_chart" style="height:100%;width:100%"></div>
-                    <script type="text/javascript">
-                    new TradingView.widget({
-                        "autosize": true,
-                        "symbol": "BINANCE:BTCUSDT",
-                        "interval": "D",
-                        "timezone": "Etc/UTC",
-                        "theme": "dark",
-                        "style": "1",
-                        "locale": "en",
-                        "enable_publishing": false,
-                        "hide_side_toolbar": false,
-                        "allow_symbol_change": true,
-                        "container_id": "tradingview_chart"
-                    });
-                    </script>
-                </div>
+            <div class="flex-1 relative" id="chart-container">
+                <div id="tv_chart_container" class="absolute inset-0"></div>
             </div>
-
-            <div class="panel p-5">
-                <div class="flex justify-between items-center mb-4">
-                    <h2>Live Market Data</h2>
-                    <span class="text-xs text-green-500 animate-pulse">● LIVE FEED</span>
-                </div>
-                <table class="w-full text-left text-sm text-gray-400">
-                    <thead class="text-xs uppercase bg-gray-900/50 text-gray-500">
-                        <tr>
-                            <th class="px-4 py-3 rounded-l">Asset</th>
-                            <th class="px-4 py-3">Price</th>
-                            <th class="px-4 py-3 text-right rounded-r">24h Change</th>
-                        </tr>
-                    </thead>
-                    <tbody id="crypto-table" class="divide-y divide-gray-800">
-                        <tr><td class="px-4 py-3">Loading...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-
         </main>
+
+        <aside class="w-72 border-l border-gray-800 bg-[#111318] flex flex-col">
+            <div class="p-4 border-b border-gray-800 bg-[#161920]">
+                <h2 class="text-xs font-bold text-gray-400 uppercase">Live News Wire</h2>
+            </div>
+            <div id="news-feed" class="flex-1 overflow-y-auto p-2 space-y-1">
+                <div class="text-xs text-center text-gray-600 mt-10">Waiting for Satellite Feed...</div>
+            </div>
+        </aside>
+
     </div>
 
     <script>
-        // 1. Load AI Data (Same logic, better UI)
-        async function loadData() {
-            try {
-                const response = await fetch('sentiment.json?t=' + Date.now());
-                const data = await response.json();
-                document.getElementById('ai-content').innerText = data.analysis;
-                document.getElementById('ai-date').innerText = data.date;
-            } catch (e) { console.log('AI Load Error'); }
-        }
+        // 1. Initialize TradingView Chart
+        let widget;
+        function loadChart(symbol, btn) {
+            // Update Tab UI
+            document.querySelectorAll('.btn-tab').forEach(b => b.classList.remove('active'));
+            if(btn) btn.classList.add('active');
 
-        // 2. Load Prices Table
-        async function loadPrices() {
-            const coins = ['bitcoin', 'ethereum', 'solana', 'ripple', 'dogecoin'];
-            try {
-                const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coins.join(',')}&vs_currencies=usd&include_24hr_change=true`);
-                const data = await res.json();
-                
-                let html = '';
-                coins.forEach(coin => {
-                    const price = data[coin].usd;
-                    const change = data[coin].usd_24h_change;
-                    const color = change >= 0 ? 'text-green-400' : 'text-red-400';
-                    const icon = change >= 0 ? '▲' : '▼';
-                    
-                    html += `
-                        <tr class="hover:bg-gray-800/50 transition">
-                            <td class="px-4 py-3 font-medium text-white capitalize">${coin}</td>
-                            <td class="px-4 py-3 font-mono text-gray-300">$${price.toLocaleString()}</td>
-                            <td class="px-4 py-3 text-right font-mono font-bold ${color}">${icon} ${change.toFixed(2)}%</td>
-                        </tr>
-                    `;
+            // Load Chart
+            if (widget) {
+                widget.symbolInterval();
+                widget = new TradingView.widget({
+                    "autosize": true,
+                    "symbol": symbol,
+                    "interval": "D",
+                    "timezone": "Etc/UTC",
+                    "theme": "dark",
+                    "style": "1",
+                    "locale": "en",
+                    "toolbar_bg": "#f1f3f6",
+                    "enable_publishing": false,
+                    "hide_side_toolbar": false,
+                    "allow_symbol_change": false,
+                    "container_id": "tv_chart_container"
                 });
-                document.getElementById('crypto-table').innerHTML = html;
-            } catch (e) { console.log("Price API Limit"); }
+            } else {
+                widget = new TradingView.widget({
+                    "autosize": true,
+                    "symbol": symbol,
+                    "interval": "D",
+                    "timezone": "Etc/UTC",
+                    "theme": "dark",
+                    "style": "1",
+                    "locale": "en",
+                    "container_id": "tv_chart_container"
+                });
+            }
         }
 
-        loadData();
-        loadPrices();
-        setInterval(loadPrices, 30000);
+        // 2. Load Your AI JSON Data
+        async function fetchIntelligence() {
+            try {
+                const res = await fetch('sentiment.json?t=' + Date.now());
+                const data = await res.json();
+
+                // Update Verdict
+                const verdictEl = document.getElementById('ai-verdict');
+                verdictEl.innerText = data.verdict;
+                if(data.verdict === 'BUY') verdictEl.className = "text-2xl font-black text-green-500 tracking-widest";
+                if(data.verdict === 'SELL') verdictEl.className = "text-2xl font-black text-red-500 tracking-widest";
+
+                document.getElementById('ai-reason').innerText = data.reason;
+                document.getElementById('ai-time').innerText = data.date;
+
+                // Update News Feed
+                const newsBox = document.getElementById('news-feed');
+                newsBox.innerHTML = '';
+                data.headlines.forEach((title, index) => {
+                    const link = data.links ? data.links[index] : '#';
+                    const html = `
+                        <a href="${link}" target="_blank" class="block p-3 rounded hover:bg-[#1f232d] transition group border-b border-gray-800/50">
+                            <div class="text-[10px] text-blue-500 font-bold mb-1 group-hover:text-blue-400">COINDESK</div>
+                            <div class="text-xs text-gray-300 leading-snug group-hover:text-white">${title}</div>
+                        </a>
+                    `;
+                    newsBox.innerHTML += html;
+                });
+
+            } catch (e) { console.log('Waiting for data...'); }
+        }
+
+        // 3. Load Header Prices
+        async function fetchPrices() {
+            try {
+                const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd');
+                const data = await res.json();
+                document.getElementById('head-btc').innerText = "$" + data.bitcoin.usd.toLocaleString();
+                document.getElementById('head-eth').innerText = "$" + data.ethereum.usd.toLocaleString();
+            } catch (e) {}
+        }
+
+        // Init
+        loadChart('BINANCE:BTCUSDT', null);
+        fetchIntelligence();
+        fetchPrices();
+        
+        // Auto-refresh
+        setInterval(fetchIntelligence, 60000); 
     </script>
 </body>
 </html>
